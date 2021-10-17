@@ -53,18 +53,18 @@ public class Sudoku {
 
 		buildModel();
 		model.getSolver().showStatistics();
-		model.getSolver().solve();
-		
-		StringBuilder st = new StringBuilder(String.format("Sudoku -- %s\n", instance, " X ", instance));
-		st.append("\t");
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++) {
-				st.append(rows[i][j]).append("\t\t\t");
+		while(model.getSolver().solve()==true) {
+			StringBuilder st = new StringBuilder(String.format("Sudoku -- %s\n", instance, " X ", instance));
+			st.append("\t");
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < n; j++) {
+					st.append(rows[i][j]).append("\t\t\t");
+				}
+				st.append("\n\t");
 			}
-			st.append("\n\t");
-		}
 
-		System.out.println(st.toString());
+			System.out.println(st.toString());
+			}
 	}
 
 	public void buildModel() {
@@ -121,7 +121,7 @@ public class Sudoku {
 	}
 
 	// Add options here
-	private static Options configParameters() {
+	public static Options configParameters() {
 
 		final Option helpFileOption = Option.builder("h").longOpt("help").desc("Display help message").build();
 
