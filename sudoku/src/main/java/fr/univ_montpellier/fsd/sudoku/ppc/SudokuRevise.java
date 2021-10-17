@@ -1,9 +1,6 @@
 
 package fr.univ_montpellier.fsd.sudoku.ppc;
 
-import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
-import static org.chocosolver.util.tools.ArrayUtils.append;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -11,10 +8,13 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
+import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
+import static org.chocosolver.util.tools.ArrayUtils.append;
 
-public class HardSudoku {
+public class SudokuRevise {
 
 	static int n;
 	static int s;
@@ -22,10 +22,15 @@ public class HardSudoku {
 	private static long timeout = 3600000; // one hour
 
 	IntVar[][] rows, cols, shapes;
+	
+	
 
 	Model model;
 
 	public static void main(String[] args) throws ParseException {
+		
+		SudokuRevise sudokuRevise = new SudokuRevise();
+		
 
 		final Options options = configParameters();
 		final CommandLineParser parser = new DefaultParser();
@@ -37,7 +42,7 @@ public class HardSudoku {
 			formatter.printHelp("sudoku", options, true);
 			System.exit(0);
 		}
-		instance = 9;
+		instance = 4;
 		// Check arguments and options
 		for (Option opt : line.getOptions()) {
 			checkOption(line, opt.getLongOpt());
@@ -46,15 +51,16 @@ public class HardSudoku {
 		n = instance;
 		s = (int) Math.sqrt(n);
 
-		new HardSudoku().solve();
+		new SudokuRevise().solve();
 	}
-
+	
+	
 	public void solve() {
 
 		buildModel();
 		model.getSolver().showStatistics();
 		model.getSolver().solve();
-
+		while(model.getSolver().solve()==true) {
 		StringBuilder st = new StringBuilder(String.format("Sudoku -- %s\n", instance, " X ", instance));
 		st.append("\t");
 		for (int i = 0; i < n; i++) {
@@ -65,6 +71,7 @@ public class HardSudoku {
 		}
 
 		System.out.println(st.toString());
+		}
 	}
 
 	public void buildModel() {
@@ -97,34 +104,7 @@ public class HardSudoku {
 			model.allDifferent(rows[i], "AC").post();
 			model.allDifferent(cols[i], "AC").post();
 			model.allDifferent(shapes[i], "AC").post();
-
 		}
-
-		// --------------------------------------
-		// TODO: add constraints here
-
-		// --------------------------------------
-		model.arithm(rows[0][0], "=", 8).post();
-		model.arithm(rows[1][2], "=", 3).post();
-		model.arithm(rows[1][3], "=", 6).post();
-		model.arithm(rows[2][1], "=", 7).post();
-		model.arithm(rows[2][4], "=", 9).post();
-		model.arithm(rows[2][6], "=", 2).post();
-		model.arithm(rows[3][1], "=", 5).post();
-		model.arithm(rows[3][5], "=", 7).post();
-		model.arithm(rows[4][4], "=", 4).post();
-		model.arithm(rows[4][5], "=", 5).post();
-		model.arithm(rows[4][6], "=", 7).post();
-		model.arithm(rows[5][3], "=", 1).post();
-		model.arithm(rows[5][7], "=", 3).post();
-		model.arithm(rows[6][2], "=", 1).post();
-		model.arithm(rows[6][7], "=", 6).post();
-		model.arithm(rows[6][8], "=", 8).post();
-		model.arithm(rows[7][2], "=", 8).post();
-		model.arithm(rows[7][3], "=", 5).post();
-		model.arithm(rows[7][7], "=", 1).post();
-		model.arithm(rows[8][1], "=", 9).post();
-		model.arithm(rows[8][6], "=", 4).post();
 
 	}
 
@@ -148,7 +128,7 @@ public class HardSudoku {
 	}
 
 	// Add options here
-	private static Options configParameters() {
+	public static Options configParameters() {
 
 		final Option helpFileOption = Option.builder("h").longOpt("help").desc("Display help message").build();
 
@@ -171,5 +151,6 @@ public class HardSudoku {
 		model.getSolver().setSearch(minDomLBSearch(append(rows)));
 
 	}
+	
 
 }
